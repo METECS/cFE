@@ -175,8 +175,23 @@ int32 CFE_ES_ShellOutputCommand(const char * CmdString, const char *Filename)
                     OS_read(fd, CFE_ES_TaskData.ShellPacket.Payload.ShellOutput, CFE_MISSION_ES_MAX_SHELL_PKT);
 
                     /* Send the packet */
-                    CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &CFE_ES_TaskData.ShellPacket);
-                    CFE_SB_SendMsg((CFE_SB_Msg_t *) &CFE_ES_TaskData.ShellPacket);
+                    {
+                        /*
+                         * Create and use a temporary structure to ensure type alignment
+                         */
+                        CFE_SB_Msg_t tempMessage;
+                        memcpy(&tempMessage, &CFE_ES_TaskData.ShellPacket, sizeof(tempMessage));
+
+                        CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &tempMessage);
+                        CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);
+
+                        /*
+                         * Copy the temporary message back to the original source as a good practice
+                         * even if not used later
+                         */
+                        memcpy(&CFE_ES_TaskData.ShellPacket, &tempMessage, sizeof(tempMessage));
+                    }
+
                     /* delay to not flood the pipe on large messages */
                     OS_TaskDelay(CFE_PLATFORM_ES_SHELL_OS_DELAY_MILLISEC);
                 }
@@ -205,8 +220,22 @@ int32 CFE_ES_ShellOutputCommand(const char * CmdString, const char *Filename)
                 CFE_ES_TaskData.ShellPacket.Payload.ShellOutput[ CFE_MISSION_ES_MAX_SHELL_PKT - 1] = '\0';
 
                 /* Send the last packet */
-                CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &CFE_ES_TaskData.ShellPacket);
-                CFE_SB_SendMsg((CFE_SB_Msg_t *) &CFE_ES_TaskData.ShellPacket);
+                {
+                    /*
+                     * Create and use a temporary structure to ensure type alignment
+                     */
+                    CFE_SB_Msg_t tempMessage;
+                    memcpy(&tempMessage, &CFE_ES_TaskData.ShellPacket, sizeof(tempMessage));
+
+                    CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &tempMessage);
+                    CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);
+
+                    /*
+                     * Copy the temporary message back to the original source as a good practice
+                     * even if not used later
+                     */
+                    memcpy(&CFE_ES_TaskData.ShellPacket, &tempMessage, sizeof(tempMessage));
+                }
    
                 /* Close the file descriptor */
                 OS_close(fd);

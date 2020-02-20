@@ -856,7 +856,23 @@ int32  CFE_SB_SubscribeFull(CFE_SB_MsgId_t   MsgId,
       CFE_SB.SubRprtMsg.Payload.Qos.Reliability = Quality.Reliability;
       CFE_SB.SubRprtMsg.Payload.SubType = CFE_SB_SUBSCRIPTION;
       CFE_SB_UnlockSharedData(__func__,__LINE__);
-      Stat = CFE_SB_SendMsg((CFE_SB_Msg_t *)&CFE_SB.SubRprtMsg);
+      {
+          /*
+           * Create and use a temporary structure to ensure type alignment
+           */
+          CFE_SB_Msg_t tempMessage;
+          memcpy(&tempMessage, &CFE_SB.SubRprtMsg, sizeof(tempMessage));
+
+
+          Stat = CFE_SB_SendMsg((CFE_SB_Msg_t *)&tempMessage);
+
+          /*
+           * Copy the temporary message back to the original source as a good practice
+           * even if not used later
+           */
+          memcpy(&CFE_SB.SubRprtMsg, &tempMessage, sizeof(tempMessage));
+      }
+
       CFE_EVS_SendEventWithAppID(CFE_SB_SUBSCRIPTION_RPT_EID,CFE_EVS_EventType_DEBUG,CFE_SB.AppId,
             "Sending Subscription Report Msg=0x%x,Pipe=%d,Stat=0x%x",
             (unsigned int)MsgId,(int)PipeId,(unsigned int)Stat);

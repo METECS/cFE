@@ -1217,7 +1217,22 @@ void CFE_TIME_Tone1HzTask(void)
             /*
             ** Send tone signal command packet...
             */
-            CFE_SB_SendMsg((CFE_SB_Msg_t *) &CFE_TIME_TaskData.ToneSignalCmd);
+            {
+                /*
+                 * Create and use a temporary structure to ensure type alignment
+                 */
+                CFE_SB_Msg_t tempMessage;
+                memcpy(&tempMessage, &CFE_TIME_TaskData.ToneSignalCmd, sizeof(tempMessage));
+
+                CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);
+
+                /*
+                 * Copy the temporary message back to the original source as a good practice
+                 * even if not used later
+                 */
+                memcpy(&CFE_TIME_TaskData.ToneSignalCmd, &tempMessage, sizeof(tempMessage));
+    }
+
 
 #if (CFE_MISSION_TIME_CFG_FAKE_TONE == true)
             /*
@@ -1225,7 +1240,22 @@ void CFE_TIME_Tone1HzTask(void)
             ** to send the tone to other time clients.
             ** (this is done by scheduler in non-fake mode)
             */
-            CFE_SB_SendMsg((CFE_SB_Msg_t *) &CFE_TIME_TaskData.ToneSendCmd);
+            {
+                /*
+                 * Create and use a temporary structure to ensure type alignment
+                 */
+                CFE_SB_Msg_t tempMessage;
+                memcpy(&tempMessage, &CFE_TIME_TaskData.ToneSendCmd, sizeof(tempMessage));
+
+                CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);
+
+                /*
+                 * Copy the temporary message back to the original source as a good practice
+                 * even if not used later
+                 */
+                memcpy(&CFE_TIME_TaskData.ToneSendCmd, &tempMessage, sizeof(tempMessage));
+            }
+
 #endif
 
             /*
@@ -1437,7 +1467,22 @@ void CFE_TIME_Local1HzTask(void)
             ** This used to be optional in previous CFE versions, but it is now required
             ** as TIME subscribes to this itself to do state machine tasks.
             */
-            CFE_SB_SendMsg((CFE_SB_Msg_t *) &CFE_TIME_TaskData.Local1HzCmd);
+            {
+                /*
+                 * Create and use a temporary structure to ensure type alignment
+                 */
+                CFE_SB_Msg_t tempMessage;
+                memcpy(&tempMessage, &CFE_TIME_TaskData.Local1HzCmd, sizeof(tempMessage));
+
+                CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);
+
+                /*
+                 * Copy the temporary message back to the original source as a good practice
+                 * even if not used later
+                 */
+                memcpy(&CFE_TIME_TaskData.Local1HzCmd, &tempMessage, sizeof(tempMessage));
+            }
+
 
             CFE_TIME_TaskData.LocalTaskCounter++;
         }
