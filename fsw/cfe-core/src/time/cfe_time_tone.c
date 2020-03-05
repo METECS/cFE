@@ -1221,7 +1221,11 @@ void CFE_TIME_Tone1HzTask(void)
                 /*
                  * Create and use a temporary structure to ensure type alignment
                  */
-                CFE_SB_Msg_t tempMessage;
+                union {
+                   CFE_SB_Msg_t attr1;
+                   CFE_TIME_ToneSignalCmd_t attr2;
+                } tempMessage;
+
                 memcpy(&tempMessage, &CFE_TIME_TaskData.ToneSignalCmd, sizeof(tempMessage));
 
                 CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);
@@ -1244,7 +1248,11 @@ void CFE_TIME_Tone1HzTask(void)
                 /*
                  * Create and use a temporary structure to ensure type alignment
                  */
-                CFE_SB_Msg_t tempMessage;
+                union {
+                   CFE_SB_Msg_t attr1;
+                   CCSDS_CommandPacket_t attr2;
+                } tempMessage;
+
                 memcpy(&tempMessage, &CFE_TIME_TaskData.ToneSendCmd, sizeof(tempMessage));
 
                 CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);
@@ -1471,7 +1479,11 @@ void CFE_TIME_Local1HzTask(void)
                 /*
                  * Create and use a temporary structure to ensure type alignment
                  */
-                CFE_SB_Msg_t tempMessage;
+                union {
+                   CFE_SB_Msg_t attr1;
+                   CCSDS_CommandPacket_t attr2;
+                } tempMessage;
+
                 memcpy(&tempMessage, &CFE_TIME_TaskData.Local1HzCmd, sizeof(tempMessage));
 
                 CFE_SB_SendMsg((CFE_SB_Msg_t *) &tempMessage);

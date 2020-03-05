@@ -179,7 +179,11 @@ int32 CFE_ES_ShellOutputCommand(const char * CmdString, const char *Filename)
                         /*
                          * Create and use a temporary structure to ensure type alignment
                          */
-                        CFE_SB_Msg_t tempMessage;
+                        union {
+                        CFE_SB_Msg_t attr1;
+                        CFE_ES_ShellTlm_t attr2;
+                        } tempMessage;
+
                         memcpy(&tempMessage, &CFE_ES_TaskData.ShellPacket, sizeof(tempMessage));
 
                         CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &tempMessage);
@@ -224,7 +228,11 @@ int32 CFE_ES_ShellOutputCommand(const char * CmdString, const char *Filename)
                     /*
                      * Create and use a temporary structure to ensure type alignment
                      */
-                    CFE_SB_Msg_t tempMessage;
+                    union {
+                        CFE_SB_Msg_t attr1;
+                        CFE_ES_ShellTlm_t attr2;
+                    } tempMessage;
+
                     memcpy(&tempMessage, &CFE_ES_TaskData.ShellPacket, sizeof(tempMessage));
 
                     CFE_SB_TimeStampMsg((CFE_SB_Msg_t *) &tempMessage);

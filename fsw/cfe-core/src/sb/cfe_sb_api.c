@@ -860,7 +860,11 @@ int32  CFE_SB_SubscribeFull(CFE_SB_MsgId_t   MsgId,
           /*
            * Create and use a temporary structure to ensure type alignment
            */
-          CFE_SB_Msg_t tempMessage;
+          union {
+             CFE_SB_Msg_t attr1;
+             CFE_SB_SingleSubscriptionTlm_t attr2;
+          } tempMessage;
+
           memcpy(&tempMessage, &CFE_SB.SubRprtMsg, sizeof(tempMessage));
 
 
