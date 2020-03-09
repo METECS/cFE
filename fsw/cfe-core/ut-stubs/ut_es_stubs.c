@@ -358,7 +358,7 @@ int32 CFE_ES_GetPoolBuf(uint32 **BufPtr,
     } Buffer;
     uint32 PoolSize;
     uint32 Position;
-    uint8 *PoolPtr;
+    uint32 *PoolPtr;
     int32 status;
 
     status = UT_DEFAULT_IMPL_RC(CFE_ES_GetPoolBuf, Size);
@@ -386,13 +386,40 @@ int32 CFE_ES_GetPoolBuf(uint32 **BufPtr,
             }
             memset(&Buffer, 0x55, Size);
             status = Size;
+            /*
+             * The following construct will result in a segmentation fault if BufPtr
+             * is passed as NULL. It was probably meant to check for *BufPtr == NULL.
+             * Further research should be performed, but it appears the following
+             * should be:
+             *
+             * <snip>
+             *
+             * if (*BufPtr == NULL || (Position + Size) > PoolSize)
+             * {
+             *    *BufPtr = &Buffer.Start;
+             * }
+             * else
+             *
+             * <snip>
+             */
             if (BufPtr == NULL || (Position + Size) > PoolSize)
             {
                 *BufPtr = &Buffer.Start;
             }
             else
             {
-                *BufPtr = (uint32 *)(PoolPtr + Position);
+                /*
+                 * To ensure portable type alignment, PoolPtr must always point
+                 * to a 32-bit boundary. That means PoolPtr must be a pointer
+                 * to uint32 and Position must be evenly divisible by 4.
+                 */
+                if (Position % 4 != 0)
+                {
+                    Position /= 4;
+                    Position++;
+                    Position *= 4;
+                }
+                *BufPtr = (uint32 *)(PoolPtr + Position/4);
                 UT_Stub_CopyFromLocal(UT_KEY(CFE_ES_GetPoolBuf), Buffer.Bytes, Size);
             }
         }

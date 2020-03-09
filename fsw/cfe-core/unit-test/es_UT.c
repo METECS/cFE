@@ -2204,7 +2204,11 @@ void TestERLog(void)
 {
     int Return;
     uint32 Context = 4;
-    char Context2[1000];
+    union
+    {
+        char bytes[1000];
+        uint32 align;
+    } Context2;
 
 #ifdef UT_VERBOSE
     UT_Text("Begin Test Exception and Reset Log\n");
@@ -4301,7 +4305,11 @@ void TestAPI(void)
 {
     uint32 Id, Id2;
     uint32 TestObjId, TestObjId2;
-    char AppName[32];
+    union
+    {
+        char bytes[32];
+        uint32 align1;
+    } AppName;
     char CounterName[11];
     char CDSName[CFE_MISSION_ES_CDS_MAX_NAME_LENGTH + 2];
     int i;
@@ -4582,14 +4590,14 @@ void TestAPI(void)
     CFE_ES_Global.AppTable[4].AppState = CFE_ES_AppState_UNDEFINED;
     ES_ResetUnitTest();
     UT_Report(__FILE__, __LINE__,
-              CFE_ES_GetAppName(AppName, 4, 32) == CFE_ES_ERR_APPID,
+              CFE_ES_GetAppName(AppName.bytes, 4, 32) == CFE_ES_ERR_APPID,
               "CFE_ES_GetAppName",
               "Get application name by ID; bad application ID");
 
     /* Test getting the app name with that app ID out of range */
     ES_ResetUnitTest();
     UT_Report(__FILE__, __LINE__,
-              CFE_ES_GetAppName(AppName,
+              CFE_ES_GetAppName(AppName.bytes,
                                 CFE_PLATFORM_ES_MAX_APPLICATIONS + 2,
                                 32) == CFE_ES_ERR_APPID,
               "CFE_ES_GetAppName",
@@ -4599,7 +4607,7 @@ void TestAPI(void)
     ES_ResetUnitTest();
     CFE_ES_Global.AppTable[0].AppState = CFE_ES_AppState_RUNNING;
     UT_Report(__FILE__, __LINE__,
-              CFE_ES_GetAppName(AppName, 0, 32) == CFE_SUCCESS,
+              CFE_ES_GetAppName(AppName.bytes, 0, 32) == CFE_SUCCESS,
               "CFE_ES_GetAppName",
               "Get application name by ID successful");
 
@@ -4648,7 +4656,7 @@ void TestAPI(void)
     Return = CFE_ES_CreateChildTask(&TaskId,
                                     "TaskName",
                                     TestAPI,
-                                    (uint32*) AppName,
+                                    (uint32*) &AppName,
                                     32,
                                     400,
                                     0);
@@ -4664,7 +4672,7 @@ void TestAPI(void)
     Return = CFE_ES_CreateChildTask(&TaskId,
                                     "TaskName",
                                     TestAPI,
-                                    (uint32*) AppName,
+                                    (uint32*) &AppName,
                                     32,
                                     400,
                                     0);
@@ -4678,7 +4686,7 @@ void TestAPI(void)
     Return = CFE_ES_CreateChildTask(NULL,
                                     "TaskName",
                                     TestAPI,
-                                    (uint32*) AppName,
+                                    (uint32*) &AppName,
                                     32,
                                     400,
                                     0);
@@ -4692,7 +4700,7 @@ void TestAPI(void)
     Return = CFE_ES_CreateChildTask(&TaskId,
                                     NULL,
                                     TestAPI,
-                                    (uint32*) AppName,
+                                    (uint32*) &AppName,
                                     32,
                                     400,
                                     0);
@@ -4706,7 +4714,7 @@ void TestAPI(void)
     Return = CFE_ES_CreateChildTask(NULL,
                                     NULL,
                                     TestAPI,
-                                    (uint32*) AppName,
+                                    (uint32*) &AppName,
                                     32,
                                     400,
                                     0);
@@ -4720,7 +4728,7 @@ void TestAPI(void)
     Return = CFE_ES_CreateChildTask(&TaskId,
                                     "TaskName",
                                     NULL,
-                                    (uint32*) AppName,
+                                    (uint32*) &AppName,
                                     32,
                                     2,
                                     0);
@@ -4740,7 +4748,7 @@ void TestAPI(void)
     Return = CFE_ES_CreateChildTask(&TaskId,
                                     "TaskName",
                                     TestAPI,
-                                    (uint32*) AppName,
+                                    (uint32*) &AppName,
                                     32,
                                     400,
                                     0);
@@ -4760,7 +4768,7 @@ void TestAPI(void)
     Return = CFE_ES_CreateChildTask(&TaskId,
                                     "TaskName",
                                     TestAPI,
-                                    (uint32*) AppName,
+                                    (uint32*) &AppName,
                                     32,
                                     400,
                                     0);
@@ -6281,7 +6289,7 @@ void TestESMempool(void)
 {
     CFE_ES_MemHandle_t    HandlePtr;
     uint8                 Buffer[CFE_PLATFORM_ES_MAX_BLOCK_SIZE];
-    uint8                 *address = NULL;
+    uint32                *address = NULL;
     uint8                 *address2 = NULL;
     Pool_t                *PoolPtr;
     CFE_ES_MemPoolStats_t Stats;
