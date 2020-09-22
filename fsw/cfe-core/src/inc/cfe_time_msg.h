@@ -880,7 +880,10 @@ typedef struct
 */
 typedef struct
 {
-  uint8                 CmdHeader[CFE_SB_CMD_HDR_SIZE];
+  union {
+      uint8                 CmdHeader[CFE_SB_CMD_HDR_SIZE];
+      uint32                align;
+  } align;
 
 } CFE_TIME_ToneSignalCmd_t;
 

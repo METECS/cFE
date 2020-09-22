@@ -704,7 +704,10 @@ typedef struct {
 } CFE_SB_SingleSubscriptionTlm_Payload_t;
 
 typedef struct{
-    CFE_SB_TlmHdr_t             Hdr;/**< \brief cFE Software Bus Telemetry Message Header */
+    union {
+        CFE_SB_TlmHdr_t  Hdr;/**< \brief cFE Software Bus Telemetry Message Header */
+        uint32           align;
+    } align;
     CFE_SB_SingleSubscriptionTlm_Payload_t Payload;
 } CFE_SB_SingleSubscriptionTlm_t;
 

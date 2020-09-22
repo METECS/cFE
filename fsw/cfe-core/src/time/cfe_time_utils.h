@@ -277,7 +277,10 @@ typedef struct
   /*
   ** Local 1Hz wake-up command packet (not related to time at tone)...
   */
-  CCSDS_CommandPacket_t Local1HzCmd;
+  union {
+      CCSDS_CommandPacket_t packet;
+      uint32                align;
+  } Local1HzCmd;
 
   /*
   ** Time at the tone command packets (sent by time servers)...
@@ -294,7 +297,10 @@ typedef struct
    * "tone signal" message above.
    */
 #if (CFE_MISSION_TIME_CFG_FAKE_TONE == true)
-  CCSDS_CommandPacket_t  ToneSendCmd;
+  union {
+  CCSDS_CommandPacket_t  packet;
+  uint32                 align;
+  } ToneSendCmd;
 #endif
 
   /*

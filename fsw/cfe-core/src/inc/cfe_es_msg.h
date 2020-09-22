@@ -1586,7 +1586,10 @@ typedef struct
 
 typedef struct
 {
-    uint8                           TlmHeader[CFE_SB_TLM_HDR_SIZE]; /**< \brief cFE Software Bus Telemetry Message Header */
+    union {
+        uint8                       TlmHeader[CFE_SB_TLM_HDR_SIZE]; /**< \brief cFE Software Bus Telemetry Message Header */
+        uint32                      align;
+    } align;
     CFE_ES_ShellPacket_Payload_t    Payload;
 }CFE_ES_ShellTlm_t;
 
