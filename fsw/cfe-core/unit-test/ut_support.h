@@ -131,6 +131,16 @@ typedef struct
 } UT_SoftwareBusSnapshot_Entry_t;
 
 /*
+ * Information about an event including the event id and
+ * the message for the event
+ */
+typedef struct
+{
+    uint16 EventID;
+    char Msg[CFE_MISSION_EVS_MAX_MESSAGE_LENGTH];
+} EventInfo_t;
+
+/*
  * Information to identify a message in the "Task Pipe"
  * or message dispatch routines, to indicate which of
  * the message handlers the routine should invoke.
@@ -551,6 +561,28 @@ bool UT_EventIsInHistory(uint16 EventIDToSearchFor);
 
 /*****************************************************************************/
 /**
+** \brief Search the event history for a specified event ID and message
+**
+** \par Description
+**        Search the event history for a specified event ID and message
+**
+** \par Assumptions, External Events, and Notes:
+**        None
+**
+** \param[in] EventIDToSearchFor  Event ID to search for in the event history
+** \param[in] MsgToSearchFor      Message to search for
+**
+** \returns
+**        true if the event ID to search for is found in the event history
+**        with the designated message
+**        false if the event ID and message combination are not found.
+**
+******************************************************************************/
+bool UT_EventIsInHistoryWithMessage(uint16 EventIDToSearchFor,
+    const char *MsgToSearchFor);
+
+/*****************************************************************************/
+/**
 ** \brief Search the syslog history for a specified log message template
 **
 ** \par Assumptions, External Events, and Notes:
@@ -688,3 +720,4 @@ void UT_CheckForOpenSockets(void);
 CFE_ES_ResetData_t *UT_GetResetDataPtr(void);
 
 #endif /* __UT_STUBS_H_ */
+

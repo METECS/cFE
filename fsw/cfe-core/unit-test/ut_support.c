@@ -64,9 +64,9 @@ static union
     CFE_ES_ResetData_t ResetData;
 } UT_CFE_ES_ResetData;
 
-static uint16   UT_SendEventHistory[UT_EVENT_HISTORY_SIZE];
-static uint16   UT_SendTimedEventHistory[UT_EVENT_HISTORY_SIZE];
-static uint16   UT_SendEventAppIDHistory[UT_EVENT_HISTORY_SIZE * 10];
+static EventInfo_t   UT_SendEventHistory[UT_EVENT_HISTORY_SIZE];
+static EventInfo_t   UT_SendTimedEventHistory[UT_EVENT_HISTORY_SIZE];
+static EventInfo_t   UT_SendEventAppIDHistory[UT_EVENT_HISTORY_SIZE * 10];
 
 
 extern int32 dummy_function(void);
@@ -387,22 +387,31 @@ void UT_ClearEventHistory(void)
     UT_SetDataBuffer(UT_KEY(CFE_EVS_SendEventWithAppID), UT_SendEventAppIDHistory, sizeof(UT_SendEventAppIDHistory), false);
 }
 
-static bool UT_CheckEventHistoryFromFunc(UT_EntryKey_t Func, uint16 EventIDToSearchFor)
+static bool UT_CheckEventHistoryFromFunc(UT_EntryKey_t Func, uint16 EventIDToSearchFor,
+                             const char *MsgToSearchFor)
 {
     bool Result = false;
     uint32 Position;
     uint32 MaxSize;
-    uint16 *EvBuf;
+    EventInfo_t *EvBuf;
 
     UT_GetDataBuffer(Func, (void**)&EvBuf, &MaxSize, &Position);
     if (EvBuf != NULL && MaxSize > 0)
     {
         while (Position > 0)
         {
-            if (*EvBuf == EventIDToSearchFor)
+            if (EvBuf->EventID == EventIDToSearchFor)
             {
-                Result = true;
-                break;
+                if (MsgToSearchFor == NULL)
+                {
+                    Result = true;
+                    break;
+                }
+                else if (strcmp(EvBuf->Msg, MsgToSearchFor) == 0)
+                {
+                    Result = true;
+                    break;
+                }
             }
             ++EvBuf;
             --Position;
@@ -418,10 +427,19 @@ static bool UT_CheckEventHistoryFromFunc(UT_EntryKey_t Func, uint16 EventIDToSea
 */
 bool UT_EventIsInHistory(uint16 EventIDToSearchFor)
 {
-    return (UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendEvent),EventIDToSearchFor) ||
-            UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendEventWithAppID),EventIDToSearchFor) ||
-            UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendTimedEvent),EventIDToSearchFor));
+    return (UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendEvent),EventIDToSearchFor, NULL) ||
+            UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendEventWithAppID),EventIDToSearchFor, NULL) ||
+            UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendTimedEvent),EventIDToSearchFor, NULL));
 }
+
+bool UT_EventIsInHistoryWithMessage(uint16 EventIDToSearchFor,
+    const char *MsgToSearchFor)
+{
+    return (UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendEvent),EventIDToSearchFor, MsgToSearchFor) ||
+            UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendEventWithAppID),EventIDToSearchFor, MsgToSearchFor) ||
+            UT_CheckEventHistoryFromFunc(UT_KEY(CFE_EVS_SendTimedEvent),EventIDToSearchFor, MsgToSearchFor));
+}
+
 
 /*
 ** Return number of events issued
@@ -434,11 +452,11 @@ uint16 UT_GetNumEventsSent(void)
     void *EvBuf;
 
     UT_GetDataBuffer(UT_KEY(CFE_EVS_SendEvent), &EvBuf, &MaxSize, &Position);
-    Total += Position / sizeof(uint16);
+    Total += Position / sizeof(EventInfo_t);
     UT_GetDataBuffer(UT_KEY(CFE_EVS_SendEventWithAppID), &EvBuf, &MaxSize, &Position);
-    Total += Position / sizeof(uint16);
+    Total += Position / sizeof(EventInfo_t);
     UT_GetDataBuffer(UT_KEY(CFE_EVS_SendTimedEvent), &EvBuf, &MaxSize, &Position);
-    Total += Position / sizeof(uint16);
+    Total += Position / sizeof(EventInfo_t);
 
     return Total;
 }

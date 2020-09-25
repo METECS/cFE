@@ -36,6 +36,7 @@
 #include "cfe.h"
 #include "cfe_platform_cfg.h"
 #include "utstubs.h"
+#include "ut_support.h"
 
 /*
 ** Functions
@@ -106,17 +107,22 @@ void CFE_EVS_TaskMain(void)
 ******************************************************************************/
 int32 CFE_EVS_SendEvent(uint16 EventID,
                         uint16 EventType,
-                        const char *Spec,
+                        const char *Msg,
                         ...)
 {
     int32 status;
 
-    UT_Stub_RegisterContext(UT_KEY(CFE_EVS_SendEvent), &EventID);
+    EventInfo_t EventInfo;
+    EventInfo.EventID = EventID;
+    strncpy(EventInfo.Msg, Msg, CFE_MISSION_EVS_MAX_MESSAGE_LENGTH);
+    EventInfo.Msg[CFE_MISSION_EVS_MAX_MESSAGE_LENGTH - 1] = '\0';
+
+    UT_Stub_RegisterContext(UT_KEY(CFE_EVS_SendEvent), &EventInfo);
     status = UT_DEFAULT_IMPL(CFE_EVS_SendEvent);
 
     if (status >= 0)
     {
-        UT_Stub_CopyFromLocal(UT_KEY(CFE_EVS_SendEvent), (uint8*)&EventID, sizeof(EventID));
+        UT_Stub_CopyFromLocal(UT_KEY(CFE_EVS_SendEvent), (uint8*)&EventInfo, sizeof(EventInfo));
     }
 
     return status;
@@ -140,17 +146,22 @@ int32 CFE_EVS_SendEvent(uint16 EventID,
 int32 CFE_EVS_SendTimedEvent(CFE_TIME_SysTime_t Time,
                              uint16 EventID,
                              uint16 EventType,
-                             const char *Spec,
+                             const char *Msg,
                              ...)
 {
     int32 status;
 
-    UT_Stub_RegisterContext(UT_KEY(CFE_EVS_SendEvent), &EventID);
+    EventInfo_t EventInfo;
+    EventInfo.EventID = EventID;
+    strncpy(EventInfo.Msg, Msg, CFE_MISSION_EVS_MAX_MESSAGE_LENGTH);
+    EventInfo.Msg[CFE_MISSION_EVS_MAX_MESSAGE_LENGTH - 1] = '\0';
+
+    UT_Stub_RegisterContext(UT_KEY(CFE_EVS_SendEvent), &EventInfo);
     status = UT_DEFAULT_IMPL(CFE_EVS_SendEvent);
 
     if (status >= 0)
     {
-        UT_Stub_CopyFromLocal(UT_KEY(CFE_EVS_SendTimedEvent), (uint8*)&EventID, sizeof(EventID));
+        UT_Stub_CopyFromLocal(UT_KEY(CFE_EVS_SendTimedEvent), (uint8*)&EventInfo, sizeof(EventInfo));
     }
 
     return CFE_SUCCESS;
@@ -213,17 +224,22 @@ int32 CFE_EVS_Register(void *Filters,
 int32 CFE_EVS_SendEventWithAppID(uint16 EventID,
                                  uint16 EventType,
                                  uint32 AppID,
-                                 const char *Spec,
+                                 const char *Msg,
                                  ...)
 {
     int32 status;
 
-    UT_Stub_RegisterContext(UT_KEY(CFE_EVS_SendEvent), &EventID);
+    EventInfo_t EventInfo;
+    EventInfo.EventID = EventID;
+    strncpy(EventInfo.Msg, Msg, CFE_MISSION_EVS_MAX_MESSAGE_LENGTH);
+    EventInfo.Msg[CFE_MISSION_EVS_MAX_MESSAGE_LENGTH - 1] = '\0';
+
+    UT_Stub_RegisterContext(UT_KEY(CFE_EVS_SendEvent), &EventInfo);
     status = UT_DEFAULT_IMPL(CFE_EVS_SendEventWithAppID);
 
     if (status >= 0)
     {
-        UT_Stub_CopyFromLocal(UT_KEY(CFE_EVS_SendEventWithAppID), (uint8*)&EventID, sizeof(EventID));
+        UT_Stub_CopyFromLocal(UT_KEY(CFE_EVS_SendEventWithAppID), (uint8*)&EventInfo, sizeof(EventInfo));
     }
 
 
@@ -260,3 +276,4 @@ int32 CFE_EVS_CleanUpApp(uint32 AppId)
 }
 
 UT_DEFAULT_STUB(CFE_EVS_ResetAllFilters, ( void ))
+

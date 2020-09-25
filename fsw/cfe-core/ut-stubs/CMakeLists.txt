@@ -12,6 +12,12 @@
 # Reference the UT assert include directory
 include_directories(${osal_MISSION_DIR}/ut_assert/inc)
 
+# Reference the CFE Unit Test directory for support header file(s)
+include_directories(../unit-test)
+include_directories(../src/evs)
+include_directories(../src/es)
+include_directories(../src/time)
+
 #
 # Create the generic stubs library
 #
